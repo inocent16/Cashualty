@@ -1,0 +1,35 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+		"python.testing.pytestEnabled": true,
+		"python.testing.pytestArgs": ["tests"],
+		"python.analysis.typeCheckingMode": "basic",
+		"editor.formatOnSave": true,
+		"editor.rulers": [110],
+		"[python]": {
+			"editor.defaultFormatter": "charliermarsh.ruff",
+			"editor.codeActionsOnSave": {
+				"source.organizeImports": "explicit",
+				"source.fixAll": "explicit"
+			}
+		},
+		"files.exclude": {
+			"**/__pycache__": true,
+			"**/*.pyc": true,
+			".venv": false
+		}
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-python.python",
+			"ms-python.vscode-pylance",
+			"charliermarsh.ruff",
+			"tamasfe.even-better-toml"
+		]
+	}
+}
