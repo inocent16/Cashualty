@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     discord_token: str
     database_path: str = "./cashualty.db"
     log_level: str = "INFO"
+    dev_guild_id: int | None = None
 
 
 settings = Settings()

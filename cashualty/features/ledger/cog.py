@@ -43,7 +43,11 @@ def _period_bounds(
 
 
 @app_commands.guild_only()
-class LedgerCog(commands.GroupCog, group_name="ledger"):
+class LedgerCog(
+    commands.GroupCog,
+    group_name="ledger",
+    description="Transparent community income/expense tracking",
+):
     """The cash-transparency feature: income/expense tracking with a
     configurable public-grace-window and correction-based edits."""
 
@@ -105,10 +109,12 @@ class LedgerCog(commands.GroupCog, group_name="ledger"):
         needle = current.lower()
         choices: list[app_commands.Choice[int]] = []
         for row in rows:
-            label = f"#{row.id} · {row.description[:50]} · {format_minor(row.amount_minor, row.currency)}"
-            if needle and needle not in label.lower():
+            # Match typed text against id/description/amount, but only ever
+            # display the id -- the user just wants "#10", not a preview.
+            search_text = f"{row.id} {row.description} {format_minor(row.amount_minor, row.currency)}"
+            if needle and needle not in search_text.lower():
                 continue
-            choices.append(app_commands.Choice(name=label[:100], value=row.id))
+            choices.append(app_commands.Choice(name=f"#{row.id}", value=row.id))
         return choices[:25]
 
     async def _publish_correction(

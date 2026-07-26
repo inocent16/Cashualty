@@ -189,6 +189,8 @@ async def edit_transaction(
     txn = await _get_owned(session, transaction_id, guild_id)
 
     if txn.status is TransactionStatus.PENDING:
+        if amount_minor is None and currency is None and description is None and type_ is None:
+            raise TransactionError("Nothing to change.")
         new_type = type_ or txn.type
         if amount_minor is not None:
             txn.amount_minor = _signed(amount_minor, new_type)
