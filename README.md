@@ -7,12 +7,30 @@ using Cogs/Extensions as the mechanism for adding independent features over time
 (e.g. Ko-fi donations) and expenses (e.g. game servers, cloud hosting) with `/ledger`,
 and let the whole server see where the money goes.
 
+## Add Cashualty to your server
+
+If you just want to use the already-running instance (hosted by this project's
+maintainer) in your own Discord server, no setup needed — invite it:
+
+**[Add Cashualty to your server](https://discord.com/oauth2/authorize?client_id=1530993618603741349&permissions=92160&integration_type=0&scope=bot+applications.commands)**
+
+Once it's in, run `/ledger config ledger-channel` first — `/ledger add-income` and
+`/ledger add-expense` refuse to run until a ledger channel is set, since there'd be
+nowhere to post to. Data is fully isolated per server, so your settings/entries never mix
+with anyone else's on the same shared instance.
+
+The rest of this README is for anyone who wants to run their **own separate copy**
+instead (a different community, a fork, local development, etc.) — you don't need any of
+it just to use the invite link above.
+
 ## Requirements
 
 - Python 3.11+
-- A Discord application + bot token from the [Discord Developer Portal](https://discord.com/developers/applications)
+- Your own Discord application + bot token from the [Discord Developer Portal](https://discord.com/developers/applications)
+  (the invite link above is tied to the maintainer's own application — running your own
+  instance means creating your own application and token, not reusing that one)
 
-## Inviting the bot to a server
+## Inviting your own instance to a server
 
 In the Developer Portal, under **Installation**: enable **Guild Install** only (not User
 Install — the ledger feature is inherently per-server: roles, channels, and settings are
@@ -21,10 +39,6 @@ all guild-scoped). Under **OAuth2 → URL Generator**, pick scopes `bot` and
 `Read Message History` bot permissions (nothing higher — Cashualty does its own
 role-based permission checks, it doesn't need `Manage Roles` or `Administrator`). Open the
 generated URL and select the server to invite it to.
-
-Once it's in the server, run `/ledger config ledger-channel` first — `/ledger add-income`
-and `/ledger add-expense` refuse to run until a ledger channel is set, since there'd be
-nowhere to post to.
 
 ## Setup
 
