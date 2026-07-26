@@ -12,6 +12,20 @@ and let the whole server see where the money goes.
 - Python 3.11+
 - A Discord application + bot token from the [Discord Developer Portal](https://discord.com/developers/applications)
 
+## Inviting the bot to a server
+
+In the Developer Portal, under **Installation**: enable **Guild Install** only (not User
+Install — the ledger feature is inherently per-server: roles, channels, and settings are
+all guild-scoped). Under **OAuth2 → URL Generator**, pick scopes `bot` and
+`applications.commands`, and at minimum the `Send Messages`, `Embed Links`, and
+`Read Message History` bot permissions (nothing higher — Cashualty does its own
+role-based permission checks, it doesn't need `Manage Roles` or `Administrator`). Open the
+generated URL and select the server to invite it to.
+
+Once it's in the server, run `/ledger config ledger-channel` first — `/ledger add-income`
+and `/ledger add-expense` refuse to run until a ledger channel is set, since there'd be
+nowhere to post to.
+
 ## Setup
 
 ```bash
@@ -83,6 +97,30 @@ needs to change, and `commands.GroupCog` gives the new feature its own top-level
 command for free.
 
 ## The `ledger` feature
+
+### Commands
+
+| Command | Who | What |
+|---|---|---|
+| `/ledger add-income` | admin | Record an income entry |
+| `/ledger add-expense` | admin | Record an expense entry |
+| `/ledger cancel` | admin | Hard-delete an entry — only while it's still pending (not yet public) |
+| `/ledger edit` | admin | Change a pending entry in place, or open a correction if it's already public |
+| `/ledger correction` | admin | Add an explicit signed adjustment to an already-public entry |
+| `/ledger balance` | admin or user role | Current net balance in the guild's base currency |
+| `/ledger overview` | admin or user role | Income/expense/net breakdown for `week`/`month`/`year`, plus owner-covered shortfall if applicable |
+| `/ledger config view` | anyone | Show current settings — always public, no permission check |
+| `/ledger config admin-roles` | Manage Server | Add/remove a role from the admin list |
+| `/ledger config user-roles` | Manage Server | Add/remove a role from the viewer list |
+| `/ledger config ledger-channel` | Manage Server | Set where public entries get posted (required before recording anything) |
+| `/ledger config audit-channel` | Manage Server | **Not implemented yet** — see note below |
+| `/ledger config grace-period` | Manage Server | Minutes before an entry publishes; `0` publishes immediately |
+| `/ledger config base-currency` | Manage Server | Currency used for `/ledger balance` / `/ledger overview` totals |
+
+> **`audit-channel` is currently a dead setting.** Every create/cancel/correction is
+> recorded in the internal `ledger_audit_log` database table (so "still visible in the
+> logs" holds even for entries hard-deleted pre-publish), but nothing yet posts those
+> events into the configured Discord channel. Setting it today has no visible effect.
 
 ### How "public" works
 
