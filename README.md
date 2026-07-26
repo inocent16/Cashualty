@@ -26,8 +26,39 @@ python -m cashualty
 Slash commands sync automatically every time the bot starts (`setup_hook` calls
 `bot.tree.sync()`), so there's no separate "deploy commands" step. Global syncs can take
 up to an hour to show up everywhere; while developing, it's often faster to sync to a
-single test guild instead (see discord.py's `CommandTree.copy_global_to` /
-guild-scoped `sync(guild=...)` if you want that).
+single test guild instead — set `DEV_GUILD_ID` in `.env` (see `.env.example`) to your
+test server's ID for instant, guild-scoped syncing. Leave it unset in production.
+
+## Deploying with Docker
+
+On the server (tested against plain Debian + Docker/Docker Compose — this does not go
+through Pterodactyl's own container management, just the Docker CLI directly):
+
+```bash
+git clone https://github.com/inocent16/Cashualty.git
+cd Cashualty
+cp .env.example .env
+# edit .env: set a real DISCORD_TOKEN, and DATABASE_PATH=/app/data/cashualty.db
+# (leave DEV_GUILD_ID unset for production -- global command sync)
+mkdir -p data
+docker compose up -d --build
+```
+
+The container's entrypoint (`docker-entrypoint.sh`) always runs `alembic upgrade head`
+before starting the bot, so schema migrations apply automatically on every restart —
+never edit `data/cashualty.db` directly, and never restart the container mid-migration
+(i.e. don't `docker compose restart` and immediately hard-kill it).
+
+Useful commands:
+
+```bash
+docker compose logs -f          # tail bot output
+docker compose down              # stop
+git pull && docker compose up -d --build   # deploy an update
+```
+
+The SQLite database lives in `./data/` on the host (bind-mounted into the container), so
+it survives image rebuilds. Back that directory up if you care about the ledger history.
 
 ## Project layout
 
@@ -97,6 +128,12 @@ guild-wide base currency (`/ledger config base-currency`) is used for `/ledger b
 and `/ledger overview` totals, converted using daily-cached rates from
 [Frankfurter.app](https://www.frankfurter.app/) (free, no API key, ECB-based). If a live
 rate fetch fails, the last cached rate is used instead.
+
+**Locale note:** Discord's number-input parsing depends on the client's language, not the
+bot. In English-locale clients, `.` is the decimal separator (`25.50`). In German (and
+other) locales, `.` is a *thousands* separator, so typing `25.50` is parsed as `2550`
+before it ever reaches the bot — use a comma (`25,50`) instead. This is entirely a Discord
+client behavior; there's nothing the bot can do to detect or correct it.
 
 ### Owner-covered shortfall
 

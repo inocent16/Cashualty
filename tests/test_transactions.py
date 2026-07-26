@@ -102,6 +102,31 @@ async def test_edit_pending_transaction_mutates_in_place(session: AsyncSession, 
     assert result.amount_minor == 2000
 
 
+async def test_edit_pending_transaction_with_no_fields_is_rejected(
+    session: AsyncSession, guild_id: int
+) -> None:
+    txn = await txn_service.create_transaction(
+        session,
+        guild_id=guild_id,
+        type_=TransactionType.INCOME,
+        amount_minor=1000,
+        currency=Currency.EUR,
+        description="test",
+        created_by=USER_ID,
+        grace_period_minutes=10,
+    )
+
+    with pytest.raises(txn_service.TransactionError):
+        await txn_service.edit_transaction(
+            session, transaction_id=txn.id, guild_id=guild_id, actor_id=USER_ID
+        )
+
+    # rejected before touching the row or writing a bogus audit entry
+    unchanged = await session.get(LedgerTransaction, txn.id)
+    assert unchanged is not None
+    assert unchanged.amount_minor == 1000
+
+
 async def test_edit_published_transaction_creates_correction_not_a_silent_edit(
     session: AsyncSession, guild_id: int
 ) -> None:

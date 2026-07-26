@@ -1,0 +1,9 @@
+services:
+  cashualty:
+    build: .
+    container_name: cashualty
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
